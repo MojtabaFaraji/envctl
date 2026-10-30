@@ -95,11 +95,15 @@ pub fn emit_activate(
 
     // Snapshot current values of keys we are about to override.
     for key in env.vars.keys() {
-        state.saved_vars.insert(key.clone(), std::env::var(key).ok());
+        state
+            .saved_vars
+            .insert(key.clone(), std::env::var(key).ok());
     }
     state.saved_path = std::env::var("PATH").ok();
     if env.cwd.is_some() {
-        state.saved_cwd = std::env::current_dir().ok().map(|p| p.to_string_lossy().into_owned());
+        state.saved_cwd = std::env::current_dir()
+            .ok()
+            .map(|p| p.to_string_lossy().into_owned());
     }
 
     // Persist snapshot so deactivate can restore.
@@ -179,8 +183,8 @@ pub fn emit_deactivate(locations: &Locations, shell: Shell) -> Result<String> {
         ));
     }
     let data = fs::read_to_string(&sf)?;
-    let state: ActivationState = serde_json::from_str(&data)
-        .map_err(|e| crate::error::EnvctlError::Parse(e.to_string()))?;
+    let state: ActivationState =
+        serde_json::from_str(&data).map_err(|e| crate::error::EnvctlError::Parse(e.to_string()))?;
 
     let mut lines: Vec<String> = vec![];
     lines.push("# envctl deactivate".to_string());
@@ -222,7 +226,7 @@ pub fn active_name(locations: &Locations) -> Result<Option<String>> {
         return Ok(None);
     }
     let data = fs::read_to_string(&sf)?;
-    let state: ActivationState = serde_json::from_str(&data)
-        .map_err(|e| crate::error::EnvctlError::Parse(e.to_string()))?;
+    let state: ActivationState =
+        serde_json::from_str(&data).map_err(|e| crate::error::EnvctlError::Parse(e.to_string()))?;
     Ok(state.active)
 }

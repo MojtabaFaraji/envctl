@@ -63,11 +63,13 @@ system = false
     pub fn load(&self, name: &str) -> Result<Environment> {
         let path = self.locations.env_file(name);
         if !path.exists() {
-            return Err(EnvctlError::NotFound(format!("environment '{name}' not found")));
+            return Err(EnvctlError::NotFound(format!(
+                "environment '{name}' not found"
+            )));
         }
         let s = fs::read_to_string(&path)?;
-        let mut env: Environment = toml::from_str(&s)
-            .map_err(|e| EnvctlError::Parse(format!("{name}: {e}")))?;
+        let mut env: Environment =
+            toml::from_str(&s).map_err(|e| EnvctlError::Parse(format!("{name}: {e}")))?;
         env.name = name.to_string();
         self.migrate(&mut env)?;
         Ok(env)
@@ -92,7 +94,9 @@ system = false
         let _lock = self.lock()?;
         let path = self.locations.env_file(name);
         if !path.exists() {
-            return Err(EnvctlError::NotFound(format!("environment '{name}' not found")));
+            return Err(EnvctlError::NotFound(format!(
+                "environment '{name}' not found"
+            )));
         }
         if backup {
             self.backup(name)?;
@@ -142,9 +146,12 @@ system = false
     }
 
     fn atomic_rename(&self, tmp: &Path, target: &Path) -> Result<()> {
-        fs::rename(tmp, target)
-            .map_err(|e| EnvctlError::Io(format!("rename: {e}")))?;
-        log_debug(&format!("renamed {} -> {}", tmp.display(), target.display()));
+        fs::rename(tmp, target).map_err(|e| EnvctlError::Io(format!("rename: {e}")))?;
+        log_debug(&format!(
+            "renamed {} -> {}",
+            tmp.display(),
+            target.display()
+        ));
         Ok(())
     }
 
@@ -164,7 +171,10 @@ system = false
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or_default()
             .as_secs();
-        let dst = self.locations.backups_dir().join(format!("{name}.{ts}.toml"));
+        let dst = self
+            .locations
+            .backups_dir()
+            .join(format!("{name}.{ts}.toml"));
         fs::copy(&src, &dst)?;
         log(&format!("backed up {name} to {}", dst.display()));
         Ok(dst)

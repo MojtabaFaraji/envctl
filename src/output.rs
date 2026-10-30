@@ -70,7 +70,12 @@ fn table_env(env: &Environment) -> String {
         }
     }
     if !env.functions.is_empty() {
-        writeln!(s, "  functions: {}", env.functions.keys().cloned().collect::<Vec<_>>().join(", ")).ok();
+        writeln!(
+            s,
+            "  functions: {}",
+            env.functions.keys().cloned().collect::<Vec<_>>().join(", ")
+        )
+        .ok();
     }
     if let Some(cwd) = &env.cwd {
         writeln!(s, "  cwd: {}", cwd.path).ok();
@@ -87,7 +92,13 @@ pub fn render_list(rows: &[(String, Option<String>)], fmt: OutputFormat) -> Resu
                 name: String,
                 updated: Option<String>,
             }
-            let v: Vec<Row> = rows.iter().map(|(n, u)| Row { name: n.clone(), updated: u.clone() }).collect();
+            let v: Vec<Row> = rows
+                .iter()
+                .map(|(n, u)| Row {
+                    name: n.clone(),
+                    updated: u.clone(),
+                })
+                .collect();
             Ok(serde_json::to_string_pretty(&v)?)
         }
         OutputFormat::Yaml => Ok(serde_yaml::to_string(rows)?),

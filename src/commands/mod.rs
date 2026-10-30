@@ -3,17 +3,17 @@ use crate::config::Locations;
 use crate::error::{EnvctlError, Result};
 use crate::log;
 use crate::log_err;
-use crate::model::{validate_key, validate_name, looks_like_secret, Environment, SCHEMA_VERSION};
-use crate::output::{OutputFormat, render_env, render_list};
+use crate::model::{looks_like_secret, validate_key, validate_name, Environment, SCHEMA_VERSION};
+use crate::output::{render_env, render_list, OutputFormat};
 use crate::secrets::{is_secret_ref, resolve_value, secret_get, secret_remove, secret_set};
-use crate::shell::{emit_activate, emit_deactivate, active_name, quote, Shell};
+use crate::shell::{active_name, emit_activate, emit_deactivate, quote, Shell};
 use crate::storage::Store;
 use clap::CommandFactory;
 use std::collections::BTreeMap;
 use std::env;
+use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, Read, Write};
-use std::fmt::Write as _;
 
 pub struct Context {
     pub locations: Locations,
@@ -82,35 +82,58 @@ pub fn run(cli: Cli) -> Result<i32> {
     match cli.command {
         Commands::Init { force } => cmd_init(&ctx, force),
         Commands::Add { env, name } => cmd_add(&ctx, &env, &name),
-        Commands::Remove { names, force, dry_run, no_backup } => {
-            cmd_remove(&ctx, &names, force, dry_run, no_backup)
-        }
-        Commands::Edit { name, editor, set, unset, description } => {
-            cmd_edit(&ctx, &name, editor, set, unset, description)
-        }
+        Commands::Remove {
+            names,
+            force,
+            dry_run,
+            no_backup,
+        } => cmd_remove(&ctx, &names, force, dry_run, no_backup),
+        Commands::Edit {
+            name,
+            editor,
+            set,
+            unset,
+            description,
+        } => cmd_edit(&ctx, &name, editor, set, unset, description),
         Commands::View { name, raw } => cmd_view(&ctx, &name, raw),
-        Commands::List { filter, sort, limit, offset, tags, all } => {
-            cmd_list(&ctx, filter, sort, limit, offset, tags, all)
-        }
-        Commands::Set { name, key, value, secret } => cmd_set(&ctx, &name, &key, value, secret),
+        Commands::List {
+            filter,
+            sort,
+            limit,
+            offset,
+            tags,
+            all,
+        } => cmd_list(&ctx, filter, sort, limit, offset, tags, all),
+        Commands::Set {
+            name,
+            key,
+            value,
+            secret,
+        } => cmd_set(&ctx, &name, &key, value, secret),
         Commands::Unset { name, keys } => cmd_unset(&ctx, &name, &keys),
-        Commands::Rename { old, new, force } => {
-            cmd_rename(&ctx, &old, &new, force)
-        }
-        Commands::Clone { src, dst, force } => {
-            cmd_clone(&ctx, &src, &dst, force)
-        }
-        Commands::Import { file, name, format, overwrite } => {
-            cmd_import(&ctx, &file, name, format, overwrite)
-        }
-        Commands::Export { name, format, file, reveal } => {
-            cmd_export(&ctx, &name, format, file, reveal)
-        }
+        Commands::Rename { old, new, force } => cmd_rename(&ctx, &old, &new, force),
+        Commands::Clone { src, dst, force } => cmd_clone(&ctx, &src, &dst, force),
+        Commands::Import {
+            file,
+            name,
+            format,
+            overwrite,
+        } => cmd_import(&ctx, &file, name, format, overwrite),
+        Commands::Export {
+            name,
+            format,
+            file,
+            reveal,
+        } => cmd_export(&ctx, &name, format, file, reveal),
         Commands::Diff { a, b } => cmd_diff(&ctx, &a, &b),
         Commands::Validate { names, all } => cmd_validate(&ctx, names, all),
-        Commands::Activate { name, shell, no_functions, no_aliases, no_cwd } => {
-            cmd_activate(&ctx, &name, shell, no_functions, no_aliases, no_cwd)
-        }
+        Commands::Activate {
+            name,
+            shell,
+            no_functions,
+            no_aliases,
+            no_cwd,
+        } => cmd_activate(&ctx, &name, shell, no_functions, no_aliases, no_cwd),
         Commands::Deactivate {} => cmd_deactivate(&ctx),
         Commands::Which {} => cmd_which(&ctx),
         Commands::Completion { shell } => cmd_completion(shell),
@@ -128,7 +151,10 @@ pub fn run(cli: Cli) -> Result<i32> {
 
 fn cmd_init(ctx: &Context, force: bool) -> Result<i32> {
     if ctx.dry_run {
-        println!("(dry-run) would initialize store at {}", ctx.locations.config_dir.display());
+        println!(
+            "(dry-run) would initialize store at {}",
+            ctx.locations.config_dir.display()
+        );
         return Ok(0);
     }
     ctx.locations.ensure_dirs()?;
@@ -149,7 +175,10 @@ system = {}
     );
     let tmp = atomic_write_tmp(&cfg_path, default_cfg.as_bytes())?;
     atomic_rename(&tmp, &cfg_path)?;
-    println!("initialized envctl store at {}", ctx.locations.config_dir.display());
+    println!(
+        "initialized envctl store at {}",
+        ctx.locations.config_dir.display()
+    );
     Ok(0)
 }
 
@@ -157,7 +186,9 @@ fn cmd_add(ctx: &Context, args: &EnvEditArgs, name: &str) -> Result<i32> {
     validate_name(name).map_err(|e| EnvctlError::Usage(e))?;
     let store = ctx.store();
     if store.exists(name) {
-        return Err(EnvctlError::Conflict(format!("environment '{name}' already exists")));
+        return Err(EnvctlError::Conflict(format!(
+            "environment '{name}' already exists"
+        )));
     }
     let mut env = build_environment(args, name)?;
     if ctx.dry_run {
@@ -169,11 +200,19 @@ fn cmd_add(ctx: &Context, args: &EnvEditArgs, name: &str) -> Result<i32> {
     Ok(0)
 }
 
-fn cmd_remove(ctx: &Context, names: &[String], force: bool, dry_run: bool, no_backup: bool) -> Result<i32> {
+fn cmd_remove(
+    ctx: &Context,
+    names: &[String],
+    force: bool,
+    dry_run: bool,
+    no_backup: bool,
+) -> Result<i32> {
     let store = ctx.store();
     for name in names {
         if !store.exists(name) {
-            return Err(EnvctlError::NotFound(format!("environment '{name}' not found")));
+            return Err(EnvctlError::NotFound(format!(
+                "environment '{name}' not found"
+            )));
         }
     }
     if !force && !dry_run {
@@ -241,12 +280,16 @@ fn cmd_edit(
     for s in &set {
         let (k, v) = parse_kv(s)?;
         validate_key(&k)?;
-        if looks_like_secret(&k) && !ctx.system && !std::env::var("ENVCTL_ALLOW_PLAINTEXT_SECRETS").is_ok() {
+        if looks_like_secret(&k)
+            && !ctx.system
+            && !std::env::var("ENVCTL_ALLOW_PLAINTEXT_SECRETS").is_ok()
+        {
             // store as keyring ref unless already a ref
             if !is_secret_ref(&v) {
                 let secret_name = format!("{}/{}", name, k);
                 secret_set(&secret_name, &v)?;
-                env.vars.insert(k, format!("secret://keyring/{secret_name}"));
+                env.vars
+                    .insert(k, format!("secret://keyring/{secret_name}"));
                 changed = true;
                 continue;
             }
@@ -310,7 +353,8 @@ fn cmd_list(
             .into_iter()
             .filter(|n| {
                 let env = store.load(n).ok();
-                env.map(|e| wanted.iter().all(|w| e.tags.contains(&w.to_string()))).unwrap_or(false)
+                env.map(|e| wanted.iter().all(|w| e.tags.contains(&w.to_string())))
+                    .unwrap_or(false)
             })
             .collect();
     }
@@ -355,7 +399,13 @@ fn cmd_list(
     Ok(0)
 }
 
-fn cmd_set(ctx: &Context, name: &str, key: &str, value: Option<String>, secret: bool) -> Result<i32> {
+fn cmd_set(
+    ctx: &Context,
+    name: &str,
+    key: &str,
+    value: Option<String>,
+    secret: bool,
+) -> Result<i32> {
     // Support `set NAME KEY=VALUE` form.
     let (key, value) = if value.is_none() && key.contains('=') {
         let pos = key.find('=').unwrap();
@@ -422,10 +472,14 @@ fn cmd_rename(ctx: &Context, old: &str, new: &str, force: bool) -> Result<i32> {
     validate_name(new).map_err(|e| EnvctlError::Usage(e))?;
     let store = ctx.store();
     if !store.exists(old) {
-        return Err(EnvctlError::NotFound(format!("environment '{old}' not found")));
+        return Err(EnvctlError::NotFound(format!(
+            "environment '{old}' not found"
+        )));
     }
     if store.exists(new) && !force {
-        return Err(EnvctlError::Conflict(format!("environment '{new}' already exists")));
+        return Err(EnvctlError::Conflict(format!(
+            "environment '{new}' already exists"
+        )));
     }
     if ctx.dry_run {
         println!("(dry-run) would rename '{old}' -> '{new}'");
@@ -444,10 +498,14 @@ fn cmd_clone(ctx: &Context, src: &str, dst: &str, force: bool) -> Result<i32> {
     validate_name(dst).map_err(|e| EnvctlError::Usage(e))?;
     let store = ctx.store();
     if !store.exists(src) {
-        return Err(EnvctlError::NotFound(format!("environment '{src}' not found")));
+        return Err(EnvctlError::NotFound(format!(
+            "environment '{src}' not found"
+        )));
     }
     if store.exists(dst) && !force {
-        return Err(EnvctlError::Conflict(format!("environment '{dst}' already exists")));
+        return Err(EnvctlError::Conflict(format!(
+            "environment '{dst}' already exists"
+        )));
     }
     let mut env = store.load(src)?;
     env.name = dst.to_string();
@@ -480,7 +538,9 @@ fn cmd_import(
     let env = parse_import(&content, fmt, file, name.as_deref())?;
     let env_name = &env.name;
     if store.exists(env_name) && !overwrite && !ctx.dry_run {
-        return Err(EnvctlError::Conflict(format!("environment '{env_name}' already exists")));
+        return Err(EnvctlError::Conflict(format!(
+            "environment '{env_name}' already exists"
+        )));
     }
     if ctx.dry_run {
         println!("(dry-run) would import environment '{env_name}'");
@@ -504,7 +564,10 @@ fn cmd_export(
         // mask secret refs: replace values with ref placeholder
         for v in env.vars.values_mut() {
             if is_secret_ref(v) {
-                *v = format!("secret://keyring/<{}>", v.split('/').last().unwrap_or("key"));
+                *v = format!(
+                    "secret://keyring/<{}>",
+                    v.split('/').last().unwrap_or("key")
+                );
             }
         }
     }
@@ -518,7 +581,10 @@ fn cmd_export(
     match output {
         Some(p) => {
             if ctx.dry_run {
-                println!("(dry-run) would write export of '{name}' to {}", p.display());
+                println!(
+                    "(dry-run) would write export of '{name}' to {}",
+                    p.display()
+                );
                 return Ok(0);
             }
             fs::write(&p, &text)?;
@@ -540,8 +606,12 @@ fn cmd_diff(ctx: &Context, a: &str, b: &str) -> Result<i32> {
     let ea = store.load(a)?;
     let eb = store.load(b)?;
     let mut diffs = Vec::new();
-    let all_keys: std::collections::BTreeSet<&str> =
-        ea.vars.keys().map(|s| s.as_str()).chain(eb.vars.keys().map(|s| s.as_str())).collect();
+    let all_keys: std::collections::BTreeSet<&str> = ea
+        .vars
+        .keys()
+        .map(|s| s.as_str())
+        .chain(eb.vars.keys().map(|s| s.as_str()))
+        .collect();
     for k in all_keys {
         match (ea.vars.get(k), eb.vars.get(k)) {
             (Some(va), Some(vb)) if va == vb => {}
@@ -624,7 +694,14 @@ fn cmd_activate(
     let shell = shell_opt.unwrap_or(Shell::detect());
     let store = ctx.store();
     let env = store.load(name)?;
-    let code = emit_activate(&ctx.locations, shell, &env, no_functions, no_aliases, no_cwd)?;
+    let code = emit_activate(
+        &ctx.locations,
+        shell,
+        &env,
+        no_functions,
+        no_aliases,
+        no_cwd,
+    )?;
     print!("{code}");
     Ok(0)
 }
@@ -653,16 +730,32 @@ fn cmd_completion(shell: CompletionShell) -> Result<i32> {
     let mut cmd = Cli::command();
     let name = "envctl";
     match shell {
-        CompletionShell::Bash => clap_complete::generate(clap_complete::Shell::Bash, &mut cmd, name, &mut io::stdout()),
-        CompletionShell::Zsh => clap_complete::generate(clap_complete::Shell::Zsh, &mut cmd, name, &mut io::stdout()),
-        CompletionShell::Fish => clap_complete::generate(clap_complete::Shell::Fish, &mut cmd, name, &mut io::stdout()),
+        CompletionShell::Bash => clap_complete::generate(
+            clap_complete::Shell::Bash,
+            &mut cmd,
+            name,
+            &mut io::stdout(),
+        ),
+        CompletionShell::Zsh => {
+            clap_complete::generate(clap_complete::Shell::Zsh, &mut cmd, name, &mut io::stdout())
+        }
+        CompletionShell::Fish => clap_complete::generate(
+            clap_complete::Shell::Fish,
+            &mut cmd,
+            name,
+            &mut io::stdout(),
+        ),
     }
     Ok(0)
 }
 
 fn cmd_secret(ctx: &Context, sub: SecretCmd) -> Result<i32> {
     match sub {
-        SecretCmd::Set { key, value, from_stdin } => {
+        SecretCmd::Set {
+            key,
+            value,
+            from_stdin,
+        } => {
             let value = if from_stdin {
                 let mut s = String::new();
                 io::stdin().read_to_string(&mut s)?;
@@ -682,19 +775,17 @@ fn cmd_secret(ctx: &Context, sub: SecretCmd) -> Result<i32> {
             println!("stored secret {key}");
             Ok(0)
         }
-        SecretCmd::Get { key, reveal } => {
-            match secret_get(&key)? {
-                Some(v) => {
-                    if reveal {
-                        println!("{v}");
-                    } else {
-                        println!("{}", "*".repeat(v.len().max(1)));
-                    }
-                    Ok(0)
+        SecretCmd::Get { key, reveal } => match secret_get(&key)? {
+            Some(v) => {
+                if reveal {
+                    println!("{v}");
+                } else {
+                    println!("{}", "*".repeat(v.len().max(1)));
                 }
-                None => Err(EnvctlError::NotFound(format!("secret '{key}' not found"))),
+                Ok(0)
             }
-        }
+            None => Err(EnvctlError::NotFound(format!("secret '{key}' not found"))),
+        },
         SecretCmd::Rm { key } => {
             if ctx.dry_run {
                 println!("(dry-run) would remove secret {key}");
@@ -706,7 +797,9 @@ fn cmd_secret(ctx: &Context, sub: SecretCmd) -> Result<i32> {
         }
         SecretCmd::List {} => {
             // keyring doesn't support listing; print hint.
-            println!("secret listing not supported by keyring backend; use `envctl secret get <key>`");
+            println!(
+                "secret listing not supported by keyring backend; use `envctl secret get <key>`"
+            );
             Ok(0)
         }
     }
@@ -722,7 +815,11 @@ fn build_environment(args: &EnvEditArgs, name: &str) -> Result<Environment> {
         env.description = d.clone();
     }
     if let Some(tags) = &args.tags {
-        env.tags = tags.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+        env.tags = tags
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
     }
     if let Some(cwd) = &args.cwd {
         env.cwd = Some(crate::model::Cwd { path: cwd.clone() });
@@ -733,7 +830,8 @@ fn build_environment(args: &EnvEditArgs, name: &str) -> Result<Environment> {
         if looks_like_secret(&k) && !is_secret_ref(&v) {
             let secret_name = format!("{name}/{k}");
             secret_set(&secret_name, &v)?;
-            env.vars.insert(k, format!("secret://keyring/{secret_name}"));
+            env.vars
+                .insert(k, format!("secret://keyring/{secret_name}"));
         } else {
             env.vars.insert(k, v);
         }
@@ -754,7 +852,12 @@ fn build_environment(args: &EnvEditArgs, name: &str) -> Result<Environment> {
     }
     if let Some(from) = &args.from {
         let content = fs::read_to_string(from).map_err(|e| EnvctlError::Io(e.to_string()))?;
-        let imported = parse_import(&content, ImportFormat::Auto, from.to_str().unwrap_or("file"), None)?;
+        let imported = parse_import(
+            &content,
+            ImportFormat::Auto,
+            from.to_str().unwrap_or("file"),
+            None,
+        )?;
         env.vars.extend(imported.vars);
         env.paths.prepend.extend(imported.paths.prepend);
         env.paths.append.extend(imported.paths.append);
@@ -766,7 +869,9 @@ fn build_environment(args: &EnvEditArgs, name: &str) -> Result<Environment> {
 }
 
 fn parse_kv(s: &str) -> Result<(String, String)> {
-    let pos = s.find('=').ok_or_else(|| EnvctlError::Usage(format!("expected KEY=VALUE, got '{s}'")))?;
+    let pos = s
+        .find('=')
+        .ok_or_else(|| EnvctlError::Usage(format!("expected KEY=VALUE, got '{s}'")))?;
     let k = s[..pos].to_string();
     let v = s[pos + 1..].to_string();
     if k.is_empty() {
@@ -775,10 +880,18 @@ fn parse_kv(s: &str) -> Result<(String, String)> {
     Ok((k, v))
 }
 
-fn parse_import(content: &str, fmt: ImportFormat, source: &str, name: Option<&str>) -> Result<Environment> {
+fn parse_import(
+    content: &str,
+    fmt: ImportFormat,
+    source: &str,
+    name: Option<&str>,
+) -> Result<Environment> {
     match fmt {
         ImportFormat::Auto => {
-            let ext = std::path::Path::new(source).extension().and_then(|e| e.to_str()).unwrap_or("");
+            let ext = std::path::Path::new(source)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
             let env = match ext {
                 "json" => parse_import(content, ImportFormat::Json, source, name)?,
                 "yaml" | "yml" => parse_import(content, ImportFormat::Yaml, source, name)?,
@@ -788,18 +901,27 @@ fn parse_import(content: &str, fmt: ImportFormat, source: &str, name: Option<&st
             Ok(env)
         }
         ImportFormat::Json => {
-            let mut env: Environment = serde_json::from_str(content).map_err(|e| EnvctlError::Parse(e.to_string()))?;
-            if let Some(n) = name { env.name = n.to_string(); }
+            let mut env: Environment =
+                serde_json::from_str(content).map_err(|e| EnvctlError::Parse(e.to_string()))?;
+            if let Some(n) = name {
+                env.name = n.to_string();
+            }
             Ok(env)
         }
         ImportFormat::Yaml => {
-            let mut env: Environment = serde_yaml::from_str(content).map_err(|e| EnvctlError::Parse(e.to_string()))?;
-            if let Some(n) = name { env.name = n.to_string(); }
+            let mut env: Environment =
+                serde_yaml::from_str(content).map_err(|e| EnvctlError::Parse(e.to_string()))?;
+            if let Some(n) = name {
+                env.name = n.to_string();
+            }
             Ok(env)
         }
         ImportFormat::Toml => {
-            let mut env: Environment = toml::from_str(content).map_err(|e| EnvctlError::Parse(e.to_string()))?;
-            if let Some(n) = name { env.name = n.to_string(); }
+            let mut env: Environment =
+                toml::from_str(content).map_err(|e| EnvctlError::Parse(e.to_string()))?;
+            if let Some(n) = name {
+                env.name = n.to_string();
+            }
             Ok(env)
         }
         ImportFormat::Dotenv => parse_dotenv(content, name),

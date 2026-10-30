@@ -21,7 +21,9 @@ pub fn secret_get(key: &str) -> Result<Option<String>> {
     match e.get_password() {
         Ok(v) => Ok(Some(v)),
         Err(keyring::Error::NoEntry) => Ok(None),
-        Err(e) => Err(crate::error::EnvctlError::Keyring(format!("get {key}: {e}"))),
+        Err(e) => Err(crate::error::EnvctlError::Keyring(format!(
+            "get {key}: {e}"
+        ))),
     }
 }
 
@@ -30,7 +32,9 @@ pub fn secret_remove(key: &str) -> Result<()> {
     match e.delete_credential() {
         Ok(()) => Ok(()),
         Err(keyring::Error::NoEntry) => Ok(()),
-        Err(e) => Err(crate::error::EnvctlError::Keyring(format!("remove {key}: {e}"))),
+        Err(e) => Err(crate::error::EnvctlError::Keyring(format!(
+            "remove {key}: {e}"
+        ))),
     }
 }
 

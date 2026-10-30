@@ -131,10 +131,7 @@ pub enum Commands {
         secret: bool,
     },
     /// Unset one or more variables
-    Unset {
-        name: String,
-        keys: Vec<String>,
-    },
+    Unset { name: String, keys: Vec<String> },
     /// Rename an environment
     #[command(alias = "mv")]
     Rename {
@@ -172,10 +169,7 @@ pub enum Commands {
         reveal: bool,
     },
     /// Diff two environments
-    Diff {
-        a: String,
-        b: String,
-    },
+    Diff { a: String, b: String },
     /// Validate environment(s)
     Validate {
         names: Vec<String>,

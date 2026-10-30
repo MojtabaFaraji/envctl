@@ -47,20 +47,30 @@ impl From<io::Error> for EnvctlError {
 }
 
 impl From<serde_json::Error> for EnvctlError {
-    fn from(e: serde_json::Error) -> Self { EnvctlError::Parse(e.to_string()) }
+    fn from(e: serde_json::Error) -> Self {
+        EnvctlError::Parse(e.to_string())
+    }
 }
 impl From<serde_yaml::Error> for EnvctlError {
-    fn from(e: serde_yaml::Error) -> Self { EnvctlError::Parse(e.to_string()) }
+    fn from(e: serde_yaml::Error) -> Self {
+        EnvctlError::Parse(e.to_string())
+    }
 }
 impl From<toml::de::Error> for EnvctlError {
-    fn from(e: toml::de::Error) -> Self { EnvctlError::Parse(e.to_string()) }
+    fn from(e: toml::de::Error) -> Self {
+        EnvctlError::Parse(e.to_string())
+    }
 }
 impl From<toml::ser::Error> for EnvctlError {
-    fn from(e: toml::ser::Error) -> Self { EnvctlError::Generic(e.to_string()) }
+    fn from(e: toml::ser::Error) -> Self {
+        EnvctlError::Generic(e.to_string())
+    }
 }
 
 impl From<String> for EnvctlError {
-    fn from(e: String) -> Self { EnvctlError::Usage(e) }
+    fn from(e: String) -> Self {
+        EnvctlError::Usage(e)
+    }
 }
 
 pub type Result<T> = std::result::Result<T, EnvctlError>;

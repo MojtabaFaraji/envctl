@@ -86,25 +86,41 @@ fn shell_compat_zsh() {
         .env("XDG_CONFIG_HOME", tmp.path().join(".config"))
         .env("XDG_STATE_HOME", tmp.path().join(".state"))
         .env("XDG_CACHE_HOME", tmp.path().join(".cache"))
-        .args(["init"]).assert().success();
+        .args(["init"])
+        .assert()
+        .success();
     let mut cmd = Command::cargo_bin("envctl").unwrap();
     cmd.env("HOME", tmp.path())
         .env("XDG_CONFIG_HOME", tmp.path().join(".config"))
         .env("XDG_STATE_HOME", tmp.path().join(".state"))
         .env("XDG_CACHE_HOME", tmp.path().join(".cache"))
-        .args(["add", "foo", "--var", "FOO=hello world", "--var", "BAR=it's"])
-        .assert().success();
+        .args([
+            "add",
+            "foo",
+            "--var",
+            "FOO=hello world",
+            "--var",
+            "BAR=it's",
+        ])
+        .assert()
+        .success();
     let mut cmd = Command::cargo_bin("envctl").unwrap();
     cmd.env("HOME", tmp.path())
         .env("XDG_CONFIG_HOME", tmp.path().join(".config"))
         .env("XDG_STATE_HOME", tmp.path().join(".state"))
         .env("XDG_CACHE_HOME", tmp.path().join(".cache"));
-    let out = cmd.args(["activate", "foo", "--shell", "zsh"]).output().unwrap();
+    let out = cmd
+        .args(["activate", "foo", "--shell", "zsh"])
+        .output()
+        .unwrap();
     let code = String::from_utf8(out.stdout).unwrap();
     std::fs::write(tmp.path().join("act.zsh"), &code).unwrap();
     let status = std::process::Command::new("zsh")
         .arg("-c")
-        .arg(format!("source {} && test \"$FOO\" = \"hello world\" && test \"$BAR\" = \"it's\"", tmp.path().join("act.zsh").display()))
+        .arg(format!(
+            "source {} && test \"$FOO\" = \"hello world\" && test \"$BAR\" = \"it's\"",
+            tmp.path().join("act.zsh").display()
+        ))
         .status()
         .unwrap();
     assert!(status.success());

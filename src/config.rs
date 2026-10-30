@@ -43,8 +43,7 @@ impl Locations {
                     "--system requires root privileges (euid 0)".into(),
                 ));
             }
-            let config_dir = config
-                .unwrap_or_else(|| PathBuf::from("/etc/envctl"));
+            let config_dir = config.unwrap_or_else(|| PathBuf::from("/etc/envctl"));
             let envs_dir = config_dir.join("envs");
             let state_dir = PathBuf::from("/var/lib/envctl");
             let cache_dir = PathBuf::from("/var/cache/envctl");
@@ -70,7 +69,10 @@ impl Locations {
                 .unwrap_or_else(|| dirs::home_dir().unwrap_or_default().join(".cache"));
 
             let base_config_dir = match config {
-                Some(c) => c.parent().map(PathBuf::from).unwrap_or_else(|| xdg_config.join("envctl")),
+                Some(c) => c
+                    .parent()
+                    .map(PathBuf::from)
+                    .unwrap_or_else(|| xdg_config.join("envctl")),
                 None => xdg_config.join("envctl"),
             };
             let config_dir = match profile {
@@ -147,8 +149,8 @@ impl Locations {
             return Ok(Config::default());
         }
         let s = fs::read_to_string(&p)?;
-        let c: Config = toml::from_str(&s)
-            .map_err(|e| crate::error::EnvctlError::Parse(e.to_string()))?;
+        let c: Config =
+            toml::from_str(&s).map_err(|e| crate::error::EnvctlError::Parse(e.to_string()))?;
         Ok(c)
     }
 }
