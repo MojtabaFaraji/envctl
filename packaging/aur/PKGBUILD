@@ -1,0 +1,25 @@
+pkgname=envctl
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Manage named shell environments"
+arch=('x86_64' 'aarch64')
+url="https://github.com/example/envctl"
+license=('MIT')
+makedepends=('cargo' 'rust')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$pkgname-$pkgver"
+    cargo build --release
+}
+
+package() {
+    cd "$pkgname-$pkgver"
+    install -Dm755 target/release/envctl "$pkgdir/usr/bin/envctl"
+    install -Dm644 docs/envctl.1 "$pkgdir/usr/share/man/man1/envctl.1"
+    install -Dm644 completions/envctl.bash "$pkgdir/usr/share/bash-completion/completions/envctl"
+    install -Dm644 completions/_envctl "$pkgdir/usr/share/zsh/site-functions/_envctl"
+    install -Dm644 completions/envctl.fish "$pkgdir/usr/share/fish/vendor_completions.d/envctl.fish"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/envctl/LICENSE"
+}

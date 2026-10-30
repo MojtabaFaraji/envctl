@@ -1,0 +1,16 @@
+# Rust
+target/
+**/*.rs.bak
+
+# Packaging output
+dist/
+
+# Toolchain / local installs (keep out of the repo)
+.cargo/
+.rustup/
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

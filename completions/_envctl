@@ -1,0 +1,1172 @@
+#compdef envctl
+
+autoload -U is-at-least
+
+_envctl() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_envctl_commands" \
+"*::: :->envctl" \
+&& ret=0
+    case $state in
+    (envctl)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:envctl-command-$line[1]:"
+        case $line[1] in
+            (init)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--force[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(add)
+_arguments "${_arguments_options[@]}" : \
+'--description=[]:DESCRIPTION:_default' \
+'*--var=[]:KEY=VALUE:_default' \
+'*--path-prepend=[]:PATH_PREPEND:_default' \
+'*--path-append=[]:PATH_APPEND:_default' \
+'*--alias=[]:NAME=CMD:_default' \
+'*--function=[]:NAME=BODY:_default' \
+'--cwd=[]:CWD:_default' \
+'--tags=[]:A,B:_default' \
+'--from=[]:FROM:_files' \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--force[]' \
+'--dry-run[]' \
+'--no-backup[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::names:_default' \
+&& ret=0
+;;
+(edit)
+_arguments "${_arguments_options[@]}" : \
+'*--set=[]:SET:_default' \
+'*--unset=[]:UNSET:_default' \
+'--description=[]:DESCRIPTION:_default' \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--editor[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(view)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--raw[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-f+[]:FILTER:_default' \
+'--filter=[]:FILTER:_default' \
+'--sort=[]:SORT:_default' \
+'-l+[]:LIMIT:_default' \
+'--limit=[]:LIMIT:_default' \
+'--offset=[]:OFFSET:_default' \
+'--tags=[]:TAGS:_default' \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--all[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--secret[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+':key:_default' \
+'::value:_default' \
+&& ret=0
+;;
+(unset)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+'*::keys:_default' \
+&& ret=0
+;;
+(rename)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--force[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':old:_default' \
+':new:_default' \
+&& ret=0
+;;
+(clone)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--force[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':src:_default' \
+':dst:_default' \
+&& ret=0
+;;
+(import)
+_arguments "${_arguments_options[@]}" : \
+'--name=[]:NAME:_default' \
+'--format=[]:FORMAT:(auto dotenv json yaml toml)' \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--overwrite[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':file:_default' \
+&& ret=0
+;;
+(export)
+_arguments "${_arguments_options[@]}" : \
+'--format=[]:FORMAT:(dotenv json yaml toml)' \
+'--file=[]:FILE:_files' \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--reveal[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(diff)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':a:_default' \
+':b:_default' \
+&& ret=0
+;;
+(validate)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--all[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::names:_default' \
+&& ret=0
+;;
+(activate)
+_arguments "${_arguments_options[@]}" : \
+'--shell=[]:SHELL:(bash zsh fish)' \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--no-functions[]' \
+'--no-aliases[]' \
+'--no-cwd[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(deactivate)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(which)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(completion)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':shell:(bash zsh fish)' \
+&& ret=0
+;;
+(secret)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_envctl__subcmd__secret_commands" \
+"*::: :->secret" \
+&& ret=0
+
+    case $state in
+    (secret)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:envctl-secret-command-$line[1]:"
+        case $line[1] in
+            (set)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--from-stdin[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':key:_default' \
+'::value:_default' \
+&& ret=0
+;;
+(get)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'--reveal[]' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':key:_default' \
+&& ret=0
+;;
+(rm)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':key:_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_envctl__subcmd__secret__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:envctl-secret-help-command-$line[1]:"
+        case $line[1] in
+            (set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(get)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rm)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(version)
+_arguments "${_arguments_options[@]}" : \
+'-c+[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--config=[Path to envctl config file (default\: XDG_CONFIG_HOME/envctl/config.toml)]:CONFIG:_files' \
+'--profile=[Named config profile (alternate config dir suffix)]:PROFILE:_default' \
+'-o+[Output format]:OUTPUT:(table json yaml plain)' \
+'--output=[Output format]:OUTPUT:(table json yaml plain)' \
+'*-v[Verbose logging (repeat for more)]' \
+'*--verbose[Verbose logging (repeat for more)]' \
+'-q[Quiet mode (errors only)]' \
+'--quiet[Quiet mode (errors only)]' \
+'-y[Assume yes to prompts]' \
+'--yes[Assume yes to prompts]' \
+'--dry-run[Print actions without applying]' \
+'--no-color[Disable color]' \
+'--no-input[Non-interactive\: fail instead of prompting]' \
+'--system[Operate on the system-wide store (requires root)]' \
+'--debug[Debug logging]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_envctl__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:envctl-help-command-$line[1]:"
+        case $line[1] in
+            (init)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(add)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(edit)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(view)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(unset)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rename)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(clone)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(import)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(export)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(diff)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(validate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(activate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(deactivate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(which)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(completion)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(secret)
+_arguments "${_arguments_options[@]}" : \
+":: :_envctl__subcmd__help__subcmd__secret_commands" \
+"*::: :->secret" \
+&& ret=0
+
+    case $state in
+    (secret)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:envctl-help-secret-command-$line[1]:"
+        case $line[1] in
+            (set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(get)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rm)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(version)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_envctl_commands] )) ||
+_envctl_commands() {
+    local commands; commands=(
+'init:Initialize config dir and defaults' \
+'add:Create a new environment' \
+'remove:Delete one or more environments' \
+'edit:Edit an environment (open \$EDITOR or mutate via flags)' \
+'view:Show a single environment in full' \
+'list:List environments' \
+'set:Set a variable (KEY=VALUE or KEY VALUE)' \
+'unset:Unset one or more variables' \
+'rename:Rename an environment' \
+'clone:Clone (duplicate) an environment' \
+'import:Import an environment from file or stdin' \
+'export:Export an environment to file or stdout' \
+'diff:Diff two environments' \
+'validate:Validate environment(s)' \
+'activate:Emit shell code to activate an environment' \
+'deactivate:Emit shell code to deactivate the active environment' \
+'which:Show the active environment' \
+'completion:Generate shell completions' \
+'secret:Manage secrets in the system keyring' \
+'version:Print version' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'envctl commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__activate_commands] )) ||
+_envctl__subcmd__activate_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl activate commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__add_commands] )) ||
+_envctl__subcmd__add_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl add commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__clone_commands] )) ||
+_envctl__subcmd__clone_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl clone commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__completion_commands] )) ||
+_envctl__subcmd__completion_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl completion commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__deactivate_commands] )) ||
+_envctl__subcmd__deactivate_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl deactivate commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__diff_commands] )) ||
+_envctl__subcmd__diff_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl diff commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__edit_commands] )) ||
+_envctl__subcmd__edit_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl edit commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__export_commands] )) ||
+_envctl__subcmd__export_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl export commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help_commands] )) ||
+_envctl__subcmd__help_commands() {
+    local commands; commands=(
+'init:Initialize config dir and defaults' \
+'add:Create a new environment' \
+'remove:Delete one or more environments' \
+'edit:Edit an environment (open \$EDITOR or mutate via flags)' \
+'view:Show a single environment in full' \
+'list:List environments' \
+'set:Set a variable (KEY=VALUE or KEY VALUE)' \
+'unset:Unset one or more variables' \
+'rename:Rename an environment' \
+'clone:Clone (duplicate) an environment' \
+'import:Import an environment from file or stdin' \
+'export:Export an environment to file or stdout' \
+'diff:Diff two environments' \
+'validate:Validate environment(s)' \
+'activate:Emit shell code to activate an environment' \
+'deactivate:Emit shell code to deactivate the active environment' \
+'which:Show the active environment' \
+'completion:Generate shell completions' \
+'secret:Manage secrets in the system keyring' \
+'version:Print version' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'envctl help commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__activate_commands] )) ||
+_envctl__subcmd__help__subcmd__activate_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help activate commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__add_commands] )) ||
+_envctl__subcmd__help__subcmd__add_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help add commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__clone_commands] )) ||
+_envctl__subcmd__help__subcmd__clone_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help clone commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__completion_commands] )) ||
+_envctl__subcmd__help__subcmd__completion_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help completion commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__deactivate_commands] )) ||
+_envctl__subcmd__help__subcmd__deactivate_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help deactivate commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__diff_commands] )) ||
+_envctl__subcmd__help__subcmd__diff_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help diff commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__edit_commands] )) ||
+_envctl__subcmd__help__subcmd__edit_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help edit commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__export_commands] )) ||
+_envctl__subcmd__help__subcmd__export_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help export commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__help_commands] )) ||
+_envctl__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help help commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__import_commands] )) ||
+_envctl__subcmd__help__subcmd__import_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help import commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__init_commands] )) ||
+_envctl__subcmd__help__subcmd__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help init commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__list_commands] )) ||
+_envctl__subcmd__help__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help list commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__remove_commands] )) ||
+_envctl__subcmd__help__subcmd__remove_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help remove commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__rename_commands] )) ||
+_envctl__subcmd__help__subcmd__rename_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help rename commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__secret_commands] )) ||
+_envctl__subcmd__help__subcmd__secret_commands() {
+    local commands; commands=(
+'set:Store a secret' \
+'get:Retrieve a secret (masked by default)' \
+'rm:Remove a secret' \
+'list:List known secrets (names only)' \
+    )
+    _describe -t commands 'envctl help secret commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__secret__subcmd__get_commands] )) ||
+_envctl__subcmd__help__subcmd__secret__subcmd__get_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help secret get commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__secret__subcmd__list_commands] )) ||
+_envctl__subcmd__help__subcmd__secret__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help secret list commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__secret__subcmd__rm_commands] )) ||
+_envctl__subcmd__help__subcmd__secret__subcmd__rm_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help secret rm commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__secret__subcmd__set_commands] )) ||
+_envctl__subcmd__help__subcmd__secret__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help secret set commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__set_commands] )) ||
+_envctl__subcmd__help__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help set commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__unset_commands] )) ||
+_envctl__subcmd__help__subcmd__unset_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help unset commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__validate_commands] )) ||
+_envctl__subcmd__help__subcmd__validate_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help validate commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__version_commands] )) ||
+_envctl__subcmd__help__subcmd__version_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help version commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__view_commands] )) ||
+_envctl__subcmd__help__subcmd__view_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help view commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__help__subcmd__which_commands] )) ||
+_envctl__subcmd__help__subcmd__which_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl help which commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__import_commands] )) ||
+_envctl__subcmd__import_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl import commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__init_commands] )) ||
+_envctl__subcmd__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl init commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__list_commands] )) ||
+_envctl__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl list commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__remove_commands] )) ||
+_envctl__subcmd__remove_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl remove commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__rename_commands] )) ||
+_envctl__subcmd__rename_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl rename commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret_commands] )) ||
+_envctl__subcmd__secret_commands() {
+    local commands; commands=(
+'set:Store a secret' \
+'get:Retrieve a secret (masked by default)' \
+'rm:Remove a secret' \
+'list:List known secrets (names only)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'envctl secret commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__get_commands] )) ||
+_envctl__subcmd__secret__subcmd__get_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret get commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__help_commands] )) ||
+_envctl__subcmd__secret__subcmd__help_commands() {
+    local commands; commands=(
+'set:Store a secret' \
+'get:Retrieve a secret (masked by default)' \
+'rm:Remove a secret' \
+'list:List known secrets (names only)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'envctl secret help commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__help__subcmd__get_commands] )) ||
+_envctl__subcmd__secret__subcmd__help__subcmd__get_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret help get commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__help__subcmd__help_commands] )) ||
+_envctl__subcmd__secret__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret help help commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__help__subcmd__list_commands] )) ||
+_envctl__subcmd__secret__subcmd__help__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret help list commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__help__subcmd__rm_commands] )) ||
+_envctl__subcmd__secret__subcmd__help__subcmd__rm_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret help rm commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__help__subcmd__set_commands] )) ||
+_envctl__subcmd__secret__subcmd__help__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret help set commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__list_commands] )) ||
+_envctl__subcmd__secret__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret list commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__rm_commands] )) ||
+_envctl__subcmd__secret__subcmd__rm_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret rm commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__secret__subcmd__set_commands] )) ||
+_envctl__subcmd__secret__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl secret set commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__set_commands] )) ||
+_envctl__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl set commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__unset_commands] )) ||
+_envctl__subcmd__unset_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl unset commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__validate_commands] )) ||
+_envctl__subcmd__validate_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl validate commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__version_commands] )) ||
+_envctl__subcmd__version_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl version commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__view_commands] )) ||
+_envctl__subcmd__view_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl view commands' commands "$@"
+}
+(( $+functions[_envctl__subcmd__which_commands] )) ||
+_envctl__subcmd__which_commands() {
+    local commands; commands=()
+    _describe -t commands 'envctl which commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_envctl" ]; then
+    _envctl "$@"
+else
+    compdef _envctl envctl
+fi

@@ -1,0 +1,133 @@
+.TH ENVCTL 1 "2026" "envctl 0.1.0" "User Commands"
+.SH NAME
+envctl \- manage named shell environments
+.SH SYNOPSIS
+.B envctl
+[\fIGLOBAL OPTIONS\fR] \fICOMMAND\fR [\fIARGS\fR]
+.SH DESCRIPTION
+envctl manages named environments: profiles capturing shell variables, PATH
+entries, aliases, functions, and an optional working directory. Profiles are
+stored as TOML under XDG directories and applied to the current shell by
+emitting shell code for \fBeval\fR.
+.SH COMMANDS
+.TP
+.B init
+Initialize the config directory and defaults.
+.TP
+.B add, create \fINAME\fR
+Create a new environment.
+.TP
+.B remove, delete \fINAMES...\fR
+Delete environments (confirmation, backup, --force, --dry-run).
+.TP
+.B edit \fINAME\fR
+Edit via $EDITOR or flags (--set, --unset, ...).
+.TP
+.B view, show \fINAME\fR
+Show an environment.
+.TP
+.B list, ls
+List environments with filtering/sorting/paging.
+.TP
+.B set \fINAME KEY VALUE\fR
+Set a variable (KEY=VALUE also accepted).
+.TP
+.B unset \fINAME KEYS...\fR
+Remove variables.
+.TP
+.B rename, mv \fIOLD NEW\fR
+Rename an environment.
+.TP
+.B clone, cp \fISRC DST\fR
+Duplicate an environment.
+.TP
+.B import \fIFILE|-\fR
+Import from .env/JSON/YAML/TOML.
+.TP
+.B export \fINAME\fR
+Export to stdout or file.
+.TP
+.B diff \fIA B\fR
+Compare two environments.
+.TP
+.B validate [NAMES...]
+Validate environments.
+.TP
+.B activate, use \fINAME\fR
+Emit shell code to activate.
+.TP
+.B deactivate
+Emit shell code to restore previous state.
+.TP
+.B which, current
+Show the active environment.
+.TP
+.B completion \fIbash|zsh|fish\fR
+Generate shell completions.
+.TP
+.B secret set|get|rm|list
+Manage secrets in the system keyring.
+.SH GLOBAL OPTIONS
+.TP
+.B \-c, \-\-config \fIPATH\fR
+Config file path.
+.TP
+.B \-\-profile \fINAME\fR
+Named config profile.
+.TP
+.B \-v, \-\-verbose
+Verbose logging.
+.TP
+.B \-q, \-\-quiet
+Quiet mode.
+.TP
+.B \-y, \-\-yes
+Assume yes.
+.TP
+.B \-\-dry-run
+Print actions without applying.
+.TP
+.B \-\-no-color
+Disable color.
+.TP
+.B \-o, \-\-output \fIFMT\fR
+table|json|yaml|plain.
+.TP
+.B \-\-no-input
+Non-interactive mode.
+.TP
+.B \-\-system
+System-wide store (requires root).
+.TP
+.B \-\-debug
+Debug logging.
+.SH EXIT STATUS
+0 success, 1 generic error, 2 usage error, 3 not found, 4 permission denied.
+.SH FILES
+.TP
+.B $XDG_CONFIG_HOME/envctl
+Config directory.
+.TP
+.B $XDG_STATE_HOME/envctl
+State directory (active snapshot, backups, lock).
+.SH ENVIRONMENT
+.TP
+.B SHELL
+Used to detect target shell for activate.
+.TP
+.B EDITOR
+Used by edit.
+.TP
+.B XDG_CONFIG_HOME, XDG_STATE_HOME, XDG_CACHE_HOME
+XDG base directories.
+.SH EXAMPLES
+.TP
+envctl init
+.TP
+envctl add work --var FOO=bar --path-prepend /opt/bin
+.TP
+eval "$(envctl activate work)"
+.TP
+envctl export work --format json
+.SH SEE ALSO
+bash(1), zsh(1), fish(1)

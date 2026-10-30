@@ -1,0 +1,9 @@
+Package: envctl
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: envctl contributors <envctl@example.com>
+Depends: libc6
+Description: Manage named shell environments
+ envctl manages named shell environments stored as TOML profiles.
