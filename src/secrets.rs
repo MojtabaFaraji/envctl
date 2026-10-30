@@ -40,8 +40,7 @@ pub fn secret_remove(key: &str) -> Result<()> {
 
 pub fn resolve_value(value: &str) -> Result<String> {
     let prefix = "secret://keyring/";
-    if value.starts_with(prefix) {
-        let name = &value[prefix.len()..];
+    if let Some(name) = value.strip_prefix(prefix) {
         match secret_get(name)? {
             Some(v) => Ok(v),
             None => Err(crate::error::EnvctlError::Keyring(format!(

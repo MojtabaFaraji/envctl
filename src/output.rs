@@ -111,7 +111,7 @@ pub fn render_list(rows: &[(String, Option<String>)], fmt: OutputFormat) -> Resu
         }
         OutputFormat::Table => {
             let mut s = String::new();
-            writeln!(s, "{:<30} {}", "NAME", "UPDATED").ok();
+            writeln!(s, "{:<30} UPDATED", "NAME").ok();
             for (n, u) in rows {
                 writeln!(s, "{:<30} {}", n, u.as_deref().unwrap_or("-")).ok();
             }

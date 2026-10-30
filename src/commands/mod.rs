@@ -1,15 +1,13 @@
 use crate::cli::*;
 use crate::config::Locations;
 use crate::error::{EnvctlError, Result};
-use crate::log;
 use crate::log_err;
-use crate::model::{looks_like_secret, validate_key, validate_name, Environment, SCHEMA_VERSION};
+use crate::model::{looks_like_secret, validate_key, validate_name, Environment};
 use crate::output::{render_env, render_list, OutputFormat};
-use crate::secrets::{is_secret_ref, resolve_value, secret_get, secret_remove, secret_set};
-use crate::shell::{active_name, emit_activate, emit_deactivate, quote, Shell};
+use crate::secrets::{is_secret_ref, secret_get, secret_remove, secret_set};
+use crate::shell::{active_name, emit_activate, emit_deactivate, Shell};
 use crate::storage::Store;
 use clap::CommandFactory;
-use std::collections::BTreeMap;
 use std::env;
 use std::fmt::Write as _;
 use std::fs;
@@ -183,14 +181,14 @@ system = {}
 }
 
 fn cmd_add(ctx: &Context, args: &EnvEditArgs, name: &str) -> Result<i32> {
-    validate_name(name).map_err(|e| EnvctlError::Usage(e))?;
+    validate_name(name).map_err(EnvctlError::Usage)?;
     let store = ctx.store();
     if store.exists(name) {
         return Err(EnvctlError::Conflict(format!(
             "environment '{name}' already exists"
         )));
     }
-    let mut env = build_environment(args, name)?;
+    let env = build_environment(args, name)?;
     if ctx.dry_run {
         println!("(dry-run) would add environment '{name}'");
         return Ok(0);
@@ -349,14 +347,11 @@ fn cmd_list(
     }
     if let Some(t) = tags {
         let wanted: Vec<&str> = t.split(',').map(|s| s.trim()).collect();
-        names = names
-            .into_iter()
-            .filter(|n| {
-                let env = store.load(n).ok();
-                env.map(|e| wanted.iter().all(|w| e.tags.contains(&w.to_string())))
-                    .unwrap_or(false)
-            })
-            .collect();
+        names.retain(|n| {
+            let env = store.load(n).ok();
+            env.map(|e| wanted.iter().all(|w| e.tags.contains(&w.to_string())))
+                .unwrap_or(false)
+        });
     }
     match sort.as_deref() {
         None | Some("name") => {}
@@ -469,7 +464,7 @@ fn cmd_unset(ctx: &Context, name: &str, keys: &[String]) -> Result<i32> {
 }
 
 fn cmd_rename(ctx: &Context, old: &str, new: &str, force: bool) -> Result<i32> {
-    validate_name(new).map_err(|e| EnvctlError::Usage(e))?;
+    validate_name(new).map_err(EnvctlError::Usage)?;
     let store = ctx.store();
     if !store.exists(old) {
         return Err(EnvctlError::NotFound(format!(
@@ -495,7 +490,7 @@ fn cmd_rename(ctx: &Context, old: &str, new: &str, force: bool) -> Result<i32> {
 }
 
 fn cmd_clone(ctx: &Context, src: &str, dst: &str, force: bool) -> Result<i32> {
-    validate_name(dst).map_err(|e| EnvctlError::Usage(e))?;
+    validate_name(dst).map_err(EnvctlError::Usage)?;
     let store = ctx.store();
     if !store.exists(src) {
         return Err(EnvctlError::NotFound(format!(
@@ -566,7 +561,7 @@ fn cmd_export(
             if is_secret_ref(v) {
                 *v = format!(
                     "secret://keyring/<{}>",
-                    v.split('/').last().unwrap_or("key")
+                    v.split('/').next_back().unwrap_or("key")
                 );
             }
         }

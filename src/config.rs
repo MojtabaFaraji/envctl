@@ -132,7 +132,7 @@ impl Locations {
             // Set permissive bits; umask may restrict.
             #[allow(unused_mut)]
             let mut md = fs::metadata(d)?;
-            let cur = md.permissions().mode();
+            let _cur = md.permissions().mode();
             // Only enforce owner bits on user store.
             if !self.system {
                 fs::set_permissions(d, fs::Permissions::from_mode(perm))?;

@@ -1,5 +1,3 @@
-use crate::error::Result;
-use crate::model::Environment;
 use crate::output::OutputFormat;
 use crate::shell::Shell;
 use clap::{Parser, Subcommand, ValueEnum};

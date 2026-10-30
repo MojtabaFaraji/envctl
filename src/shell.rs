@@ -89,8 +89,10 @@ pub fn emit_activate(
     no_cwd: bool,
 ) -> Result<String> {
     let ppid = unsafe { libc::getppid() };
-    let mut state = ActivationState::default();
-    state.ppid = ppid;
+    let mut state = ActivationState {
+        ppid,
+        ..ActivationState::default()
+    };
     state.active = Some(env.name.clone());
 
     // Snapshot current values of keys we are about to override.
@@ -107,7 +109,7 @@ pub fn emit_activate(
     }
 
     // Persist snapshot so deactivate can restore.
-    fs::create_dir_all(&locations.active_dir())?;
+    fs::create_dir_all(locations.active_dir())?;
     let sf = state_file(locations, ppid);
     let data = serde_json::to_string_pretty(&state)?;
     let mut f = fs::File::create(&sf)?;

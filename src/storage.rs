@@ -5,10 +5,9 @@ use crate::log_debug;
 use crate::model::Environment;
 use fs2::FileExt;
 use std::fs;
-use std::io::{self, Write};
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
 use std::time::SystemTime;
 
 /// Persistent store for environments.
@@ -49,7 +48,7 @@ system = false
         for entry in fs::read_dir(envs_dir)? {
             let entry = entry?;
             let path = entry.path();
-            if path.extension().map_or(false, |e| e == "toml") {
+            if path.extension().is_some_and(|e| e == "toml") {
                 if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
                     names.push(stem.to_string());
                 }
@@ -119,7 +118,8 @@ system = false
             .read(true)
             .write(true)
             .create(true)
-            .open(&self.locations.lock_file())?;
+            .truncate(true)
+            .open(self.locations.lock_file())?;
         f.lock_exclusive()
             .map_err(|e| EnvctlError::Io(format!("lock: {e}")))?;
         log_debug("acquired store lock");
@@ -165,7 +165,7 @@ system = false
     }
 
     fn backup(&self, name: &str) -> Result<PathBuf> {
-        fs::create_dir_all(&self.locations.backups_dir())?;
+        fs::create_dir_all(self.locations.backups_dir())?;
         let src = self.locations.env_file(name);
         let ts = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
