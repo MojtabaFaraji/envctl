@@ -115,6 +115,16 @@ fn shell_compat_zsh() {
         .unwrap();
     let code = String::from_utf8(out.stdout).unwrap();
     std::fs::write(tmp.path().join("act.zsh"), &code).unwrap();
+    // Skip if zsh is not installed (e.g. minimal CI containers)
+    if std::process::Command::new("zsh")
+        .arg("--version")
+        .output()
+        .is_err()
+    {
+        eprintln!("skipping shell_compat_zsh: zsh not installed");
+        return;
+    }
+
     let status = std::process::Command::new("zsh")
         .arg("-c")
         .arg(format!(
