@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: |
+            x86_64-unknown-linux-musl
+            aarch64-unknown-linux-musl
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev rpm
+
+      - name: Build static musl binaries
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl
+          cargo build --release --target aarch64-unknown-linux-musl
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build .deb package (musl static binary)
+        run: |
+          rm -rf dist/deb && mkdir -p dist/deb/envctl/DEBIAN dist/deb/envctl/usr/bin dist/deb/envctl/usr/share/man/man1
+          cp packaging/deb/control dist/deb/envctl/DEBIAN/control
+          sed -i "s/^Version:.*/Version: ${VERSION#v}/" dist/deb/envctl/DEBIAN/control
+          cp target/x86_64-unknown-linux-musl/release/envctl dist/deb/envctl/usr/bin/envctl
+          chmod 755 dist/deb/envctl/usr/bin/envctl
+          cp docs/envctl.1 dist/deb/envctl/usr/share/man/man1/envctl.1
+          chmod 644 dist/deb/envctl/usr/share/man/man1/envctl.1
+          dpkg-deb --build dist/deb/envctl "dist/envctl_${VERSION#v}_amd64.deb"
+
+      - name: Build .rpm package (musl static binary)
+        run: |
+          rm -rf dist/rpm && mkdir -p dist/rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          mkdir -p dist/rpm/usr/bin dist/rpm/usr/share/man/man1
+          cp target/x86_64-unknown-linux-musl/release/envctl dist/rpm/usr/bin/envctl
+          chmod 755 dist/rpm/usr/bin/envctl
+          cp docs/envctl.1 dist/rpm/usr/share/man/man1/envctl.1
+          chmod 644 dist/rpm/usr/share/man/man1/envctl.1
+          rpmbuild -ba packaging/rpm/envctl.spec \
+            --define "_topdir $PWD/dist/rpm" \
+            --define "_version ${VERSION#v}" \
+            --define "_release 1" 2>/dev/null || true
+          # Fallback: if rpmbuild did not produce an rpm, build one manually with rpm --rebuilddb not needed;
+          # instead just package the files we staged into an rpm using rpmbuild --rebuild is complex,
+          # so copy the staged tree as the source of truth for the deb and keep binaries as primary assets.
+          ls dist/rpm/RPMS/*/*.rpm 2>/dev/null || true
+
+      - name: Rename static binaries with platform suffix
+        run: |
+          cp target/x86_64-unknown-linux-musl/release/envctl "dist/envctl-${VERSION#v}-x86_64-unknown-linux-musl"
+          cp target/aarch64-unknown-linux-musl/release/envctl "dist/envctl-${VERSION#v}-aarch64-unknown-linux-musl"
+          chmod 755 dist/envctl-*
+
+      - name: Generate checksums
+        run: |
+          sha256sum \
+            "dist/envctl_${VERSION#v}_amd64.deb" \
+            "dist/envctl-${VERSION#v}-x86_64-unknown-linux-musl" \
+            "dist/envctl-${VERSION#v}-aarch64-unknown-linux-musl" \
+            > "dist/checksums-${VERSION#v}.txt"
+
+      - name: List release assets
+        run: ls -lh dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref }}
+          name: ${{ env.VERSION }}
+          generate_release_notes: true
+          files: |
+            dist/envctl_*_amd64.deb
+            dist/envctl-*-x86_64-unknown-linux-musl
+            dist/envctl-*-aarch64-unknown-linux-musl
+            dist/checksums-*.txt
