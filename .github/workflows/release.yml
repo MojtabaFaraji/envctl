@@ -23,7 +23,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev rpm
+          sudo apt-get install -y dpkg-dev rpm gcc-aarch64-linux-gnu
 
       - name: Build static musl binaries
         run: |

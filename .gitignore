@@ -5,10 +5,6 @@ target/
 # Packaging output
 dist/
 
-# Toolchain / local installs (keep out of the repo)
-.cargo/
-.rustup/
-
 # Editor / OS
 .idea/
 .vscode/
